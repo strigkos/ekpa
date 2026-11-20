@@ -28,3 +28,6 @@ Give me a number: 42
 Choose how to test 42 - ('p' for prime, 'g' for goldbach) p
 42 is not prime
 
+=======================
+
+Δέχεται μέχρι 15-ψήφιους αριθμούς (μαζί με πιθανά αρικά μηδενικά)
