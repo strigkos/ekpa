@@ -16,7 +16,7 @@
   Για παράδειγμα, για το 10 η μόνη αποδεκτή απάντηση είναι 10 = 3 + 7
 
 - Το αρχείο C που θα υποβληθεί πρέπει να μεταγλωττίζεται χωρίς ειδοποιήσεις για λάθη
-  `gcc -O0 -m32 -Wall -Wextra -Werror -pedantic -o goldbach goldbach.c`
+  gcc -O0 -m32 -Wall -Wextra -Werror -pedantic -o goldbach goldbach.c
 
 ex.
 $ gcc -O0 -m32 -Wall -Wextra -Werror -pedantic -o goldbach goldbach.c
