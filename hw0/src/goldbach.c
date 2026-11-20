@@ -1,9 +1,6 @@
 #include <ctype.h>   
 /* Για την αναγνώριση ψηφίων και κενών χαρακτήρων με isdigit και isspace */
 
-#include <errno.h>
-/* Για τον έλεγχο υπερχείλισης με errno και ERANGE */
-
 #include <stdbool.h>
 /* Για τον τύπο bool και τιμές true και false για λογικούς ελέγχους */
 
@@ -28,37 +25,51 @@ enum input_status {
    Ελέγχει ότι διαβάστηκε ολόκληρη η λέξη και ότι η τιμή είναι εντός ορίου.
 */
 enum input_status read_number(unsigned long long *number) {
+
+    /* Πίνακας για την αποθήκευση της λέξης */
     char word[16];
+
+    /* Δείκτης για το τέλος της λέξης */
     char *end;
 
-    /* Διάλεξα πίνακα char word[16], οπότε το %15s αφήνει μία θέση για το '\0', που σηματοδοτεί το τέλος της λέξης
-    Το 16 ήταν επιλογή μεγέθους του πίνακα
-    Ο μεγαλύτερος αριθμός της άσκησης, 10000000000, έχει 11 ψηφία, ή 12 χαρακτήρες αν γράψουμε και + μπροστά
-    Ο επιπλέον χώρος επιτρέπει, για παράδειγμα, να διαβάσουμε πιθανά αρχικά μηδενικά
-    */
+    /* Διαβάζει έως 15 χαρακτήρες και αφήνει μία θέση για το '\0'. */
     if (scanf("%15s", word) != 1) {
         return INPUT_END;
     }
-    int delimiter = getchar();
-    if (delimiter != EOF && !isspace(delimiter)) {
-        return INPUT_INVALID;
+
+    /* Αν η λέξη συνεχίζεται μετά τους 15 χαρακτήρες, η είσοδος είναι άκυρη. */
+    int next_char = getchar();
+    if (next_char != EOF) {
+        if (!isspace(next_char)) {
+            return INPUT_INVALID;
+        }
     }
 
-    bool negative = word[0] == '-';
+    /* Ελέγχει αν ο αριθμός είναι αρνητικός */
+    bool negative = false;
     const char *digits = word;
-    if (word[0] == '+' || negative) {
-        ++digits;
+    if (word[0] == '-') {
+        negative = true;
+        digits = word + 1;
     }
+
+    /* Ελέγχει αν τα ψηφία είναι έγκυρα */
     if (!isdigit((unsigned char)*digits)) {
         return INPUT_INVALID;
     }
 
-    errno = 0;
+    /* Έως 15 δεκαδικά ψηφία χωρούν σε unsigned long long. */
     unsigned long long value = strtoull(digits, &end, 10);
     if (*end != '\0') {
         return INPUT_INVALID;
     }
-    if (errno == ERANGE || value > MAX_NUMBER || (negative && value != 0)) {
+
+    /* Ένας αρνητικός ακέραιος είναι εκτός εύρους. Το -0 έχει τιμή 0. */
+    if (negative && value != 0) {
+        return INPUT_OUT_OF_RANGE;
+    }
+
+    if (value > MAX_NUMBER) {
         return INPUT_OUT_OF_RANGE;
     }
 
@@ -102,7 +113,7 @@ void print_goldbach_pair(unsigned long long n)
 {
     /* Η υπόθεση του θεωρήματος του Goldbach ισχύει μόνο για άρτιους αριθμούς μεγαλύτερους του 2, ή αλλιώς >= 4 */
     if (n <= 2 || n % 2 != 0) {
-        puts("Goldbach's conjecture applies only to even numbers greater than 2.");
+        puts("Goldbach's conjecture is applicable only to even numbers greater than 2!");
         return;
     }
 
@@ -146,11 +157,11 @@ int main(void)
             return EXIT_SUCCESS;
         }
         if (ferror(stdin) || status == INPUT_INVALID) {
-            fputs("Invalid input: expected an integer.\n", stderr);
+            fputs("Invalid input: expected an integer (no more than 15 chars)\n", stderr);
             return EXIT_FAILURE;
         }
         if (status == INPUT_OUT_OF_RANGE) {
-            fprintf(stderr, "Number must be in the range [0, %llu].\n", MAX_NUMBER);
+            fprintf(stderr, "Number should be in the range [0, %llu]\n", MAX_NUMBER);
             return EXIT_FAILURE;
         }
 
@@ -158,12 +169,12 @@ int main(void)
         fflush(stdout);
         char choice;
         if (scanf(" %c", &choice) != 1 || (choice != 'p' && choice != 'g')) {
-            fputs("Invalid choice: expected 'p' or 'g'.\n", stderr);
+            fputs("Invalid choice: expected 'p' or 'g'\n", stderr);
             return EXIT_FAILURE;
         }
-        int delimiter = getchar();
-        if (ferror(stdin) || (delimiter != EOF && !isspace(delimiter))) {
-            fputs("Invalid choice: expected 'p' or 'g'.\n", stderr);
+        int next_char = getchar();
+        if (ferror(stdin) || (next_char != EOF && !isspace(next_char))) {
+            fputs("Invalid choice: expected 'p' or 'g'\n", stderr);
             return EXIT_FAILURE;
         }
 
