@@ -149,11 +149,12 @@ int main(void)
 {
     unsigned long long number;
 
-    for (;;) {
+    while (true) {
         fputs("Give me a number: ", stdout);
         fflush(stdout);
         enum input_status status = read_number(&number);
         if (status == INPUT_END && !ferror(stdin)) {
+            puts("EOF detected, exiting");
             return EXIT_SUCCESS;
         }
         if (ferror(stdin) || status == INPUT_INVALID) {
@@ -168,7 +169,12 @@ int main(void)
         printf("Choose how to test %llu - ('p' for prime, 'g' for goldbach) ", number);
         fflush(stdout);
         char choice;
-        if (scanf(" %c", &choice) != 1 || (choice != 'p' && choice != 'g')) {
+        int choice_status = scanf(" %c", &choice);
+        if (choice_status == EOF && !ferror(stdin)) {
+            puts("EOF detected, exiting");
+            return EXIT_SUCCESS;
+        }
+        if (choice_status != 1 || (choice != 'p' && choice != 'g')) {
             fputs("Invalid choice: expected 'p' or 'g'\n", stderr);
             return EXIT_FAILURE;
         }
